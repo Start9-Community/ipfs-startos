@@ -1,3 +1,0 @@
-[submodule "go-ipfs"]
-	path = go-ipfs
-	url = git@github.com:ipfs/go-ipfs
