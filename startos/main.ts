@@ -1,4 +1,5 @@
 // import { storeJson } from './fileModels/store.json'
+import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { rpcPort, mounts, gatewayPort } from './utils'
 
@@ -8,7 +9,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
    *
    * In this section, we fetch any resources or run any desired preliminary commands.
    */
-  console.info('Starting IPFS!')
+  console.info(i18n('Starting IPFS!'))
 
   // const password = await storeJson.read((s) => s.password).const(effects)
   // if (!password) {
@@ -133,11 +134,11 @@ export const main = sdk.setupMain(async ({ effects }) => {
       subcontainer,
       exec: { command: sdk.useEntrypoint(), runAsInit: true },
       ready: {
-        display: 'Web Interface',
+        display: i18n('Web Interface'),
         fn: () =>
           sdk.healthCheck.checkPortListening(effects, rpcPort, {
-            successMessage: 'The web interface is ready',
-            errorMessage: 'The web interface is not ready',
+            successMessage: i18n('The web interface is ready'),
+            errorMessage: i18n('The web interface is not ready'),
           }),
       },
       requires: ['chown'],

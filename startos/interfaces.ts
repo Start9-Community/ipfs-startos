@@ -1,4 +1,5 @@
 // import { storeJson } from './fileModels/store.json'
+import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { gatewayPort, rpcPort, swarmPort } from './utils'
 
@@ -13,9 +14,9 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     // addSsl: { addXForwardedHeaders: true },
   })
   const rpc = sdk.createInterface(effects, {
-    name: 'Admin Portal (private)',
+    name: i18n('Admin Portal (private)'),
     id: 'rpc',
-    description: 'Your private admin portal',
+    description: i18n('Your private admin portal'),
     type: 'ui',
     masked: false,
     schemeOverride: null,
@@ -34,9 +35,9 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     // addSsl: { addXForwardedHeaders: true },
   })
   const gateway = sdk.createInterface(effects, {
-    name: 'Public Gateway',
+    name: i18n('Public Gateway'),
     id: 'gateway',
-    description: 'Your public web gateway',
+    description: i18n('Your public web gateway'),
     type: 'ui',
     masked: false,
     schemeOverride: null,
@@ -56,9 +57,9 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     secure: { ssl: false },
   })
   const swarm = sdk.createInterface(effects, {
-    name: 'Swam P2P',
+    name: i18n('Swam P2P'),
     id: 'swarm',
-    description: 'Your IPFS node on the P2P network',
+    description: i18n('Your IPFS node on the P2P network'),
     type: 'p2p',
     masked: false,
     schemeOverride: null,

@@ -1,4 +1,5 @@
 import { setupManifest } from '@start9labs/start-sdk'
+import i18n from './i18n'
 
 export const manifest = setupManifest({
   id: 'ipfs',
@@ -11,14 +12,12 @@ export const manifest = setupManifest({
   donationUrl: null,
   docsUrl:
     'https://github.com/Start9Labs/ipfs-startos/blob/master/instructions.md',
-  description: {
-    short: 'InterPlanetary File System',
-    long: `A peer-to-peer hypermedia protocol designed to preserve and grow humanity's knowledge by making the web upgradeable, resilient, and more open.`,
-  },
+  description: i18n.description,
   volumes: ['main', 'startos'],
   images: {
     ipfs: {
       source: { dockerTag: 'ipfs/kubo:v0.39.0' },
+      arch: ['x86_64', 'aarch64'],
     },
   },
   dependencies: {},
