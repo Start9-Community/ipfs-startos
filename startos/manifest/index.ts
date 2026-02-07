@@ -10,8 +10,7 @@ export const manifest = setupManifest({
   supportSite: 'https://github.com/Start9Labs/ipfs-startos/issues',
   marketingSite: 'https://ipfs.tech/',
   donationUrl: null,
-  docsUrl:
-    'https://github.com/Start9Labs/ipfs-startos/blob/master/instructions.md',
+  docsUrl: 'https://docs.ipfs.tech/',
   description: i18n.description,
   volumes: ['main', 'startos'],
   images: {
