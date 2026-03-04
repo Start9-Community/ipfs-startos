@@ -1,7 +1,7 @@
 // import { storeJson } from './fileModels/store.json'
 import { i18n } from './i18n'
 import { sdk } from './sdk'
-import { rpcPort, mounts, gatewayPort } from './utils'
+import { gatewayPort, mounts, rpcPort } from './utils'
 
 export const main = sdk.setupMain(async ({ effects }) => {
   /**
@@ -31,7 +31,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
   const publicGateways = await sdk.serviceInterface
     .getOwn(effects, 'gateway', (i) =>
       i?.addressInfo?.nonLocal.hostnames
-        .map((h) => h.hostname.value)
+        .map((h) => h.hostname)
         .reduce(
           (obj, curr) => ({
             ...obj,

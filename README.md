@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="icon.png" alt="IPFS Logo" width="21%">
+  <img src="icon.svg" alt="IPFS Logo" width="21%">
 </p>
 
 # IPFS on StartOS
@@ -7,7 +7,7 @@
 > **Upstream docs:** <https://docs.ipfs.tech/>
 >
 > Everything not listed in this document should behave the same as upstream
-> Kubo v0.39.0. If a feature, setting, or behavior is not mentioned
+> Kubo. If a feature, setting, or behavior is not mentioned
 > here, the upstream documentation is accurate and fully applicable.
 
 [IPFS](https://github.com/ipfs/kubo) (InterPlanetary File System) is a peer-to-peer hypermedia protocol designed to make the web faster, safer, and more open. Kubo is the reference implementation of IPFS.
@@ -36,7 +36,7 @@
 
 | Property | Value |
 |----------|-------|
-| Image | `ipfs/kubo:v0.39.0` (upstream unmodified) |
+| Image | `ipfs/kubo` (upstream unmodified) |
 | Architectures | x86_64, aarch64 |
 
 ---
@@ -185,8 +185,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and development wo
 
 ```yaml
 package_id: ipfs
-upstream_version: 0.39.0
-image: ipfs/kubo:v0.39.0
+image: ipfs/kubo
 architectures: [x86_64, aarch64]
 volumes:
   main: /data/ipfs
