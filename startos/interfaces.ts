@@ -11,7 +11,6 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   const rpcMulti = sdk.MultiHost.of(effects, 'rpc-multi')
   const rpcMultiOrigin = await rpcMulti.bindPort(rpcPort, {
     protocol: 'http',
-    // addSsl: { addXForwardedHeaders: true },
   })
   const rpc = sdk.createInterface(effects, {
     name: i18n('Admin Portal (private)'),
@@ -32,7 +31,6 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   const gatewayMulti = sdk.MultiHost.of(effects, 'gateway-multi')
   const gatewayMultiOrigin = await gatewayMulti.bindPort(gatewayPort, {
     protocol: 'http',
-    // addSsl: { addXForwardedHeaders: true },
   })
   const gateway = sdk.createInterface(effects, {
     name: i18n('Public Gateway'),
