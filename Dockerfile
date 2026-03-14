@@ -1,14 +1,11 @@
-# Note: when updating the go minor version here, also update the go-channel in snap/snapcraft.yml
-FROM golang:1.18.5-buster
-LABEL maintainer="Steven Allen <steven@stebalien.com>"
+FROM golang:1.25-bookworm AS builder
 
 # Install deps
 RUN apt-get update && apt-get install -y \
-  libssl-dev \
   ca-certificates \
   fuse
 
-ENV SRC_DIR /go-ipfs
+ENV SRC_DIR /kubo
 
 # Download packages first so they can be cached.
 COPY go-ipfs/go.mod go-ipfs/go.sum $SRC_DIR/
@@ -24,56 +21,42 @@ ARG IPFS_PLUGINS
 # Build the thing.
 # Also: fix getting HEAD commit hash via git rev-parse.
 RUN cd $SRC_DIR \
-  # && mkdir -p .git/objects \
-  && GOFLAGS=-buildvcs=false make build GOTAGS=openssl IPFS_PLUGINS=$IPFS_PLUGINS
+  && mkdir -p .git/objects \
+  && GOFLAGS=-buildvcs=false make build IPFS_PLUGINS=$IPFS_PLUGINS
 
-# Get su-exec, a very minimal tool for dropping privileges,
-# and tini, a very minimal init daemon for containers
-ENV SUEXEC_VERSION v0.2
-ENV TINI_VERSION v0.19.0
+# Extract required runtime tools from Debian
+FROM debian:bookworm-slim AS utilities
 RUN set -eux; \
-    dpkgArch="$(dpkg --print-architecture)"; \
-    case "${dpkgArch##*-}" in \
-        "amd64" | "armhf" | "arm64") tiniArch="tini-static-$dpkgArch" ;;\
-        *) echo >&2 "unsupported architecture: ${dpkgArch}"; exit 1 ;; \
-    esac; \
-  cd /tmp \
-  && git clone https://github.com/ncopa/su-exec.git \
-  && cd su-exec \
-  && git checkout -q $SUEXEC_VERSION \
-  && make su-exec-static \
-  && cd /tmp \
-  && wget -q -O tini https://github.com/krallin/tini/releases/download/$TINI_VERSION/$tiniArch \
-  && chmod +x tini
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+    tini \
+    gosu \
+    fuse \
+    ca-certificates \
+  ; \
+  apt-get clean; \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Now comes the actual target image, which aims to be as small as possible.
-# FROM busybox:1.31.1-glibc
-FROM debian:buster-slim
-LABEL maintainer="Steven Allen <steven@stebalien.com>"
+FROM debian:bookworm-slim
 
-RUN apt update && apt install -y curl wget
+RUN apt-get update && apt-get install -y --no-install-recommends curl wget && \
+  apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Get the ipfs binary, entrypoint script, and TLS CAs from the build container.
-ENV SRC_DIR /go-ipfs
-COPY --from=0 $SRC_DIR/cmd/ipfs/ipfs /usr/local/bin/ipfs
-COPY --from=0 $SRC_DIR/bin/container_daemon /usr/local/bin/start_ipfs
-COPY --from=0 /tmp/su-exec/su-exec-static /sbin/su-exec
-COPY --from=0 /tmp/tini /sbin/tini
-COPY --from=0 /bin/fusermount /usr/local/bin/fusermount
-COPY --from=0 /etc/ssl/certs /etc/ssl/certs
+ENV SRC_DIR /kubo
+COPY --from=builder $SRC_DIR/cmd/ipfs/ipfs /usr/local/bin/ipfs
+COPY --from=builder $SRC_DIR/bin/container_daemon /usr/local/bin/start_ipfs
+COPY --from=utilities /usr/sbin/gosu /sbin/gosu
+COPY --from=utilities /usr/bin/tini /sbin/tini
+COPY --from=utilities /bin/fusermount /usr/local/bin/fusermount
+COPY --from=utilities /etc/ssl/certs /etc/ssl/certs
 
 # Add suid bit on fusermount so it will run properly
 RUN chmod 4755 /usr/local/bin/fusermount
 
 # Fix permissions on start_ipfs (ignore the build machine's permissions)
 RUN chmod 0755 /usr/local/bin/start_ipfs
-
-# This shared lib (part of glibc) doesn't seem to be included with busybox.
-COPY --from=0 /lib/*-linux-gnu*/libdl.so.2 /lib/
-
-# Copy over SSL libraries.
-COPY --from=0 /usr/lib/*-linux-gnu*/libssl.so* /usr/lib/
-COPY --from=0 /usr/lib/*-linux-gnu*/libcrypto.so* /usr/lib/
 
 # Swarm TCP; should be exposed to the public
 EXPOSE 4001
@@ -106,7 +89,7 @@ RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/d
 VOLUME $IPFS_PATH
 
 # The default logging level
-ENV IPFS_LOGGING ""
+ENV GOLOG_LOG_LEVEL ""
 
 ADD docker_entrypoint.sh /usr/local/bin/docker_entrypoint.sh
 ADD check-web.sh /usr/local/bin/check-web.sh

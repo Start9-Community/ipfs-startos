@@ -1,10 +1,10 @@
 id: ipfs
 title: "IPFS"
-version: 0.15.0
-release-notes: "Initial release for EmbassyOS"
+version: 0.40.1
+release-notes: "Upgrade IPFS/Kubo from 0.15.0 to 0.40.1"
 license: mit
 wrapper-repo: "https://github.com/chrisguida/ipfs-wrapper"
-upstream-repo: "https://github.com/ipfs/go-ipfs"
+upstream-repo: "https://github.com/ipfs/kubo"
 support-site: "https://community.start9.com/"
 marketing-site: "https://ipfs.tech/"
 build: ["make"]
