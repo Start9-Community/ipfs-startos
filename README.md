@@ -1,105 +1,214 @@
-# Wrapper for ipfs
+<p align="center">
+  <img src="icon.svg" alt="IPFS Logo" width="21%">
+</p>
 
-IPFS is a peer-to-peer hypermedia protocol designed to preserve and grow
-humanity's knowledge by making the web upgradeable, resilient, and more open.
+# IPFS on StartOS
+
+> **Upstream docs:** <https://docs.ipfs.tech/>
+>
+> Everything not listed in this document should behave the same as upstream
+> Kubo. If a feature, setting, or behavior is not mentioned
+> here, the upstream documentation is accurate and fully applicable.
+
+[IPFS](https://github.com/ipfs/kubo) (InterPlanetary File System) is a peer-to-peer hypermedia protocol designed to make the web faster, safer, and more open. Kubo is the reference implementation of IPFS.
+
+---
+
+## Table of Contents
+
+- [Image and Container Runtime](#image-and-container-runtime)
+- [Volume and Data Layout](#volume-and-data-layout)
+- [Installation and First-Run Flow](#installation-and-first-run-flow)
+- [Configuration Management](#configuration-management)
+- [Network Access and Interfaces](#network-access-and-interfaces)
+- [Actions (StartOS UI)](#actions-startos-ui)
+- [Dependencies](#dependencies)
+- [Backups and Restore](#backups-and-restore)
+- [Health Checks](#health-checks)
+- [Limitations and Differences](#limitations-and-differences)
+- [What Is Unchanged from Upstream](#what-is-unchanged-from-upstream)
+- [Contributing](#contributing)
+- [Quick Reference for AI Consumers](#quick-reference-for-ai-consumers)
+
+---
+
+## Image and Container Runtime
+
+| Property | Value |
+|----------|-------|
+| Image | `ipfs/kubo` (upstream unmodified) |
+| Architectures | x86_64, aarch64 |
+
+---
+
+## Volume and Data Layout
+
+| Volume | Mount Point | Purpose |
+|--------|-------------|---------|
+| `main` | `/data/ipfs` | IPFS repository (config, datastore, blocks) |
+| `startos` | — | Reserved for StartOS state |
+
+---
+
+## Installation and First-Run Flow
+
+| Step | Upstream | StartOS |
+|------|----------|---------|
+| Installation | Download binary or Docker | Install from marketplace |
+| Configuration | `ipfs init` + manual config | Auto-configured on startup |
+| Access | CLI or localhost web UI | Web UI via StartOS interfaces |
+
+**First-run steps:**
+
+1. Install IPFS from StartOS marketplace
+2. Access the Admin Portal (Web UI) to manage your node
+3. Use the Public Gateway to access IPFS content
+4. Your node automatically joins the P2P network via Swarm
+
+---
+
+## Configuration Management
+
+### Auto-Configured Settings
+
+StartOS automatically configures the following on each startup:
+
+| Setting | Value | Purpose |
+|---------|-------|---------|
+| `API.HTTPHeaders.Access-Control-Allow-Origin` | StartOS URLs | CORS for web UI access |
+| `API.HTTPHeaders.Access-Control-Allow-Methods` | `["PUT","POST"]` | CORS methods |
+| `Addresses.API` | `/ip4/0.0.0.0/tcp/5001` | API listening address |
+| `Addresses.Gateway` | `/ip4/0.0.0.0/tcp/8080` | Gateway listening address |
+| `Gateway.PublicGateways` | StartOS hostnames | Subdomain gateway support |
+| `Swarm.RelayClient.Enabled` | `true` | Enable relay client |
+| `Swarm.Transports.Network.Relay` | `true` | Enable relay transport |
+
+### Configuration NOT Exposed on StartOS
+
+All other IPFS configuration can be modified via:
+
+- The Web UI settings panel
+- The `ipfs config` command (via container exec)
+
+---
+
+## Network Access and Interfaces
+
+| Interface | Port | Protocol | Purpose |
+|-----------|------|----------|---------|
+| Admin Portal | 5001 | HTTP | Web UI and RPC API (`/webui`) |
+| Public Gateway | 8080 | HTTP | Content gateway (`/ipfs`, `/ipns`) |
+| Swarm P2P | 4001 | TCP | Peer-to-peer network |
+
+**Access methods (StartOS 0.4.0):**
+
+- LAN IP with unique port
+- `<hostname>.local` with unique port
+- Tor `.onion` address
+- Custom domains (if configured)
+
+**Swarm connectivity:** Port 4001 is exposed for P2P connections. Relay client is enabled for NAT traversal.
+
+---
+
+## Actions (StartOS UI)
+
+None. IPFS is configured automatically and managed via the Web UI.
+
+---
 
 ## Dependencies
 
-- [docker](https://docs.docker.com/get-docker)
-- [docker-buildx](https://docs.docker.com/buildx/working-with-buildx/)
-- [yq](https://mikefarah.gitbook.io/yq)
-- [Rust](https://www.rust-lang.org/)
-- [md-packer](https://github.com/Start9Labs/md-packer)
-- [embassy-sdk](https://github.com/Start9Labs/embassy-os/tree/master/backend)
-- [make](https://www.gnu.org/software/make/)
+None. IPFS is a standalone application.
 
-## Build enviroment
+---
 
-Prepare your EmbassyOS build enviroment. In this example we are using Ubuntu
-20.04.
+## Backups and Restore
 
-1. Install docker
+**Included in backup:**
 
+- `main` volume — IPFS repository (config, keys, pinned content, datastore)
+
+**Restore behavior:**
+
+- Node identity (peer ID) preserved
+- Pinned content restored
+- Configuration restored
+
+---
+
+## Health Checks
+
+| Check | Display Name | Method |
+|-------|--------------|--------|
+| Web Interface | Web Interface | Port 5001 listening |
+
+**Messages:**
+
+- Success: "The web interface is ready"
+- Error: "The web interface is not ready"
+
+---
+
+## Limitations and Differences
+
+1. **No CLI access by default** — Use Web UI or container exec for CLI commands
+2. **Auto-configured networking** — CORS and gateway settings managed by StartOS
+3. **No authentication** — Admin portal is not password-protected (access controlled by StartOS)
+
+---
+
+## What Is Unchanged from Upstream
+
+- Full IPFS node functionality
+- P2P network participation (DHT)
+- Content pinning and retrieval
+- IPNS name publishing
+- Web UI for node management
+- HTTP Gateway for content access
+- RPC API (`/api/v0`)
+- Relay client for NAT traversal
+- All `ipfs` CLI commands (via container exec)
+- Garbage collection
+- Bandwidth management
+- Peer management
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and development workflow.
+
+---
+
+## Quick Reference for AI Consumers
+
+```yaml
+package_id: ipfs
+image: ipfs/kubo
+architectures: [x86_64, aarch64]
+volumes:
+  main: /data/ipfs
+  startos: (reserved)
+ports:
+  rpc: 5001
+  gateway: 8080
+  swarm: 4001
+dependencies: none
+actions: none
+auto_config:
+  - API.HTTPHeaders (CORS)
+  - Addresses.API (0.0.0.0:5001)
+  - Addresses.Gateway (0.0.0.0:8080)
+  - Gateway.PublicGateways (subdomain support)
+  - Swarm.RelayClient.Enabled (true)
+  - Swarm.Transports.Network.Relay (true)
+health_checks:
+  - port_listening: 5001
+backup_volumes:
+  - main
+interfaces:
+  - rpc: Admin Portal (Web UI at /webui)
+  - gateway: Public Gateway (/ipfs, /ipns)
+  - swarm: P2P network (port 4001)
 ```
-curl -fsSL https://get.docker.com -o- | bash
-sudo usermod -aG docker "$USER"
-exec sudo su -l $USER
-```
-
-2. Set buildx as the default builder
-
-```
-docker buildx install
-docker buildx create --use
-```
-
-3. Enable cross-arch emulated builds in docker
-
-```
-docker run --privileged --rm linuxkit/binfmt:v0.8
-```
-
-4. Install yq
-
-```
-sudo snap install yq
-```
-
-5. Install essentials build packages
-
-```
-sudo apt-get install -y build-essential openssl libssl-dev libc6-dev clang libclang-dev ca-certificates
-```
-
-6. Install Rust
-
-```
-curl https://sh.rustup.rs -sSf | sh
-# Choose nr 1 (default install)
-source $HOME/.cargo/env
-```
-
-7. Install md-packer
-
-```
-cargo install --git=https://github.com/Start9Labs/md-packer.git --branch=main
-```
-
-8. Build and install embassy-sdk
-
-```
-cd ~/ && git clone https://github.com/Start9Labs/embassy-os.git
-cd embassy-os/
-make sdk
-```
-
-## Cloning
-
-Clone the project locally. Note the submodule link to the original project(s).
-
-```
-git clone https://github.com/Start9Labs/ipfs-wrapper.git
-cd ipfs-wrapper
-git submodule update --init --recursive
-```
-
-## Building
-
-To build the project, run the following commands:
-
-```
-make
-```
-
-## Installing (on Embassy)
-
-SSH into an Embassy device. `scp` the `.s9pk` to any directory from your local
-machine. Run the following command to install the package:
-
-```
-embassy-cli auth login
-#Enter your embassy password then run:
-embassy-cli package install /path/to/ipfs.s9pk
-```
-
-## Done
