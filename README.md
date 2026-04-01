@@ -195,6 +195,7 @@ ports:
   gateway: 8080
   swarm: 4001
 dependencies: none
+startos_managed_env_vars: none
 actions: none
 auto_config:
   - API.HTTPHeaders (CORS)
