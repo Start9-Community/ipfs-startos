@@ -1,4 +1,4 @@
-import { VersionInfo } from '@start9labs/start-sdk'
+import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 import { rm } from 'fs/promises'
 
 export const v_0_42_0_0 = VersionInfo.of({
@@ -37,6 +37,6 @@ export const v_0_42_0_0 = VersionInfo.of({
         console.error,
       )
     },
-    down: async ({ effects }) => {},
+    down: IMPOSSIBLE,
   },
 })
