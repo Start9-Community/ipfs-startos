@@ -1,7 +1,15 @@
 // import { storeJson } from './fileModels/store.json'
 import { i18n } from './i18n'
 import { sdk } from './sdk'
-import { gatewayPort, mounts, rpcPort } from './utils'
+import {
+  gatewayHostId,
+  gatewayInterfaceId,
+  gatewayPort,
+  mounts,
+  rpcHostId,
+  rpcInterfaceId,
+  rpcPort,
+} from './utils'
 
 export const main = sdk.setupMain(async ({ effects }) => {
   /**
@@ -16,7 +24,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
   //   throw new Error('password not found')
   // }
 
-  const subcontainer = await sdk.SubContainer.of(
+  const subcontainer = sdk.SubContainer.of(
     effects,
     { imageId: 'ipfs' },
     mounts,
@@ -24,13 +32,25 @@ export const main = sdk.setupMain(async ({ effects }) => {
   )
 
   const rpcAddresses =
-    (await sdk.serviceInterface
-      .getOwn(effects, 'rpc', (i) => i?.addressInfo?.nonLocal.format('url'))
+    (await sdk.host
+      .getOwn(effects, rpcHostId, (host) => {
+        const iface =
+          host &&
+          Object.values(host.bindings)
+            .flatMap((b) => Object.values(b.interfaces))
+            .find((i) => i.id === rpcInterfaceId)
+        return iface?.addressInfo.nonLocal.format('url')
+      })
       .const()) || []
 
-  const publicGateways = await sdk.serviceInterface
-    .getOwn(effects, 'gateway', (i) =>
-      i?.addressInfo?.nonLocal.hostnames
+  const publicGateways = await sdk.host
+    .getOwn(effects, gatewayHostId, (host) => {
+      const iface =
+        host &&
+        Object.values(host.bindings)
+          .flatMap((b) => Object.values(b.interfaces))
+          .find((i) => i.id === gatewayInterfaceId)
+      return iface?.addressInfo.nonLocal.hostnames
         .map((h) => h.hostname)
         .reduce(
           (obj, curr) => ({
@@ -41,8 +61,8 @@ export const main = sdk.setupMain(async ({ effects }) => {
             },
           }),
           {},
-        ),
-    )
+        )
+    })
     .const()
 
   /**
