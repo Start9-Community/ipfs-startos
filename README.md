@@ -34,29 +34,29 @@
 
 ## Image and Container Runtime
 
-| Property | Value |
-|----------|-------|
-| Image | `ipfs/kubo` (upstream unmodified) |
-| Architectures | x86_64, aarch64 |
+| Property      | Value                             |
+| ------------- | --------------------------------- |
+| Image         | `ipfs/kubo` (upstream unmodified) |
+| Architectures | x86_64, aarch64                   |
 
 ---
 
 ## Volume and Data Layout
 
-| Volume | Mount Point | Purpose |
-|--------|-------------|---------|
-| `main` | `/data/ipfs` | IPFS repository (config, datastore, blocks) |
-| `startos` | — | Reserved for StartOS state |
+| Volume    | Mount Point  | Purpose                                     |
+| --------- | ------------ | ------------------------------------------- |
+| `main`    | `/data/ipfs` | IPFS repository (config, datastore, blocks) |
+| `startos` | —            | Reserved for StartOS state                  |
 
 ---
 
 ## Installation and First-Run Flow
 
-| Step | Upstream | StartOS |
-|------|----------|---------|
-| Installation | Download binary or Docker | Install from marketplace |
-| Configuration | `ipfs init` + manual config | Auto-configured on startup |
-| Access | CLI or localhost web UI | Web UI via StartOS interfaces |
+| Step          | Upstream                    | StartOS                       |
+| ------------- | --------------------------- | ----------------------------- |
+| Installation  | Download binary or Docker   | Install from marketplace      |
+| Configuration | `ipfs init` + manual config | Auto-configured on startup    |
+| Access        | CLI or localhost web UI     | Web UI via StartOS interfaces |
 
 **First-run steps:**
 
@@ -73,15 +73,15 @@
 
 StartOS automatically configures the following on each startup:
 
-| Setting | Value | Purpose |
-|---------|-------|---------|
-| `API.HTTPHeaders.Access-Control-Allow-Origin` | StartOS URLs | CORS for web UI access |
-| `API.HTTPHeaders.Access-Control-Allow-Methods` | `["PUT","POST"]` | CORS methods |
-| `Addresses.API` | `/ip4/0.0.0.0/tcp/5001` | API listening address |
-| `Addresses.Gateway` | `/ip4/0.0.0.0/tcp/8080` | Gateway listening address |
-| `Gateway.PublicGateways` | StartOS hostnames | Subdomain gateway support |
-| `Swarm.RelayClient.Enabled` | `true` | Enable relay client |
-| `Swarm.Transports.Network.Relay` | `true` | Enable relay transport |
+| Setting                                        | Value                   | Purpose                   |
+| ---------------------------------------------- | ----------------------- | ------------------------- |
+| `API.HTTPHeaders.Access-Control-Allow-Origin`  | StartOS URLs            | CORS for web UI access    |
+| `API.HTTPHeaders.Access-Control-Allow-Methods` | `["PUT","POST"]`        | CORS methods              |
+| `Addresses.API`                                | `/ip4/0.0.0.0/tcp/5001` | API listening address     |
+| `Addresses.Gateway`                            | `/ip4/0.0.0.0/tcp/8080` | Gateway listening address |
+| `Gateway.PublicGateways`                       | StartOS hostnames       | Subdomain gateway support |
+| `Swarm.RelayClient.Enabled`                    | `true`                  | Enable relay client       |
+| `Swarm.Transports.Network.Relay`               | `true`                  | Enable relay transport    |
 
 ### Configuration NOT Exposed on StartOS
 
@@ -94,11 +94,11 @@ All other IPFS configuration can be modified via:
 
 ## Network Access and Interfaces
 
-| Interface | Port | Protocol | Purpose |
-|-----------|------|----------|---------|
-| Admin Portal | 5001 | HTTP | Web UI and RPC API (`/webui`) |
-| Public Gateway | 8080 | HTTP | Content gateway (`/ipfs`, `/ipns`) |
-| Swarm P2P | 4001 | TCP | Peer-to-peer network |
+| Interface      | Port | Protocol | Purpose                            |
+| -------------- | ---- | -------- | ---------------------------------- |
+| Admin Portal   | 5001 | HTTP     | Web UI and RPC API (`/webui`)      |
+| Public Gateway | 8080 | HTTP     | Content gateway (`/ipfs`, `/ipns`) |
+| Swarm P2P      | 4001 | TCP      | Peer-to-peer network               |
 
 **Access methods (StartOS 0.4.0):**
 
@@ -139,8 +139,8 @@ None. IPFS is a standalone application.
 
 ## Health Checks
 
-| Check | Display Name | Method |
-|-------|--------------|--------|
+| Check         | Display Name  | Method              |
+| ------------- | ------------- | ------------------- |
 | Web Interface | Web Interface | Port 5001 listening |
 
 **Messages:**
@@ -177,7 +177,7 @@ None. IPFS is a standalone application.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and development workflow.
+Build and development workflow follow the StartOS packaging guide: <https://docs.start9.com/packaging>. Keep `README.md`, `instructions.md`, and `AGENTS.md` in sync with any change to user-visible behavior or package structure.
 
 ---
 
