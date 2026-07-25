@@ -2,7 +2,7 @@ import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 import { rm } from 'fs/promises'
 
 export const current = VersionInfo.of({
-  version: '0.42.0:3',
+  version: '0.42.0:4',
   releaseNotes: {
     en_US:
       'Updated Kubo (IPFS) to 0.42.0.\n\n' +
