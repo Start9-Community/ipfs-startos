@@ -6,12 +6,12 @@ Develop it inside a StartOS packaging workspace created by `start-cli s9pk init-
 which provides the packaging guide and agent context one level up. If you're reading this in a
 bare clone with no workspace, the full guide is at <https://docs.start9.com/packaging>.
 
-Work this package's `TODO.md` from top to bottom. Keep `README.md` (architecture, for developers and LLMs) and `instructions.md` (end-user docs) in sync with your changes.
+Work this package's `TODO.md` from top to bottom. Keep `README.md` (technical reference for an AI support or administering agent) and `instructions.md` (end-user docs) in sync with your changes.
 
 ## This repo
 
-- **Package id is `ipfs`.** Packages the Kubo IPFS node. Exposes three hosts/interfaces: `rpc` (private admin/Web UI), `gateway` (public IPFS/IPNS gateway), and `swarm` (P2P). Host-id and interface-id constants live in `startos/utils.ts`.
-
-## Inspecting a running install
-
-To run a command inside the service's container (read its generated config, grep app logs), use `start-cli package attach ipfs -n ipfs -- <cmd>`. Select the subcontainer by **name** with `-n` (the name passed to `SubContainer.of` in `main.ts` — here `ipfs-sub`) or by image with `-i`. Note: `-s/--subcontainer` matches the internal **Guid**, not the name, so passing a name to `-s` fails with "no matching subcontainers".
+- **The admin portal is unauthenticated, and the auth path is commented out in four places** — `actions/resetPassword.ts`, its registration in `actions/index.ts`, `init/taskSetPassword.ts`, and the `API.Authorizations` block plus the `username` field in `interfaces.ts`/`main.ts`. Anyone reaching port 5001 can reconfigure the node. Finishing that work means re-enabling all of them together; leaving it half-done is worse than either state.
+- **Kubo's config is written through its own CLI on every start, not modelled.** The values are derived from the addresses the server currently has — API origins from the admin interface, the public-gateway table from the gateway interface — so they cannot be a static file, and an address change is picked up by restarting.
+- **`runAsInit: true` is required** — the upstream image expects to be PID 1.
+- **`ipfs init` runs once, gated on `kind === 'install'`.** It generates the node's peer identity; running it again would replace that identity and orphan every address others use to reach the node.
+- **The `chown` oneshot must stay ordered after `config`.** The config step writes as root; without the chown afterwards the daemon cannot read its own data directory.
