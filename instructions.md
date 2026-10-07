@@ -13,6 +13,8 @@
 
 ## Getting set up
 
+If you carried IPFS over from StartOS 0.3.5, this update removes the old **API / Web UI** and **IPFS Gateway** addresses. Their Tor addresses are not transferred. Add replacement addresses to **Admin Portal (private)** and **Public Gateway** if you need them.
+
 1. Start the service and wait for the **Web Interface** health check to go green.
 2. Open the **Admin Portal (private)** interface. The Web UI loads at `/webui` and is immediately usable — there is no first-run wizard or login.
 3. Open the **Public Gateway** interface to confirm content retrieval works (visit `/ipfs/<cid>` for any CID).
