@@ -9,7 +9,7 @@ const dict = {
   'Your private admin portal': 5,
   'Public Gateway': 6,
   'Your public web gateway': 7,
-  'Swam P2P': 8,
+  'Swarm P2P': 8,
   'Your IPFS node on the P2P network': 9,
 } as const
 

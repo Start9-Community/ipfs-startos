@@ -65,7 +65,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     secure: { ssl: false },
   })
   const swarm = sdk.createInterface(effects, {
-    name: i18n('Swam P2P'),
+    name: i18n('Swarm P2P'),
     id: swarmInterfaceId,
     description: i18n('Your IPFS node on the P2P network'),
     type: 'p2p',

@@ -99,6 +99,8 @@ The gateway is the opposite: it exists to be reachable, and serves content to wh
 
 **The gateway's address list is baked into the node's configuration at start**, which is why adding or removing an address for it needs a restart to take effect.
 
+The interfaces live on hosts `rpc-multi`, `gateway-multi` and `swarm-multi`. An install carried over from StartOS 0.3.5 also had hosts `main` (port 5001) and `gateway` (port 8080) from the old package; the update to `0.42.0:5` retires both, freeing their ports and dropping their addresses. Their onions are not moved to the current hosts.
+
 ## Installation and First-Run Flow
 
 Install initializes the node once, generating its identity, and seeds the store. Nothing else is required — there is no task and no credential.
