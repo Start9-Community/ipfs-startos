@@ -13,7 +13,7 @@ export const manifest = setupManifest({
   volumes: ['main', 'startos'],
   images: {
     ipfs: {
-      source: { dockerTag: 'ipfs/kubo:v0.42.0' },
+      source: { dockerBuild: { buildArgs: { IMAGE: 'ipfs/kubo:v0.42.0' } } },
       arch: ['x86_64', 'aarch64'],
     },
   },
