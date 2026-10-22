@@ -35,7 +35,9 @@
 
 ## Image and Container Runtime
 
-One upstream image, consumed unmodified.
+One upstream image. The root `Dockerfile` replaces its `/etc/ssl/certs` with a current
+CA bundle (the image has no package manager); that layer comes out once upstream ships
+an image built on a fixed store.
 
 | Property      | Value                                                    |
 | ------------- | -------------------------------------------------------- |
