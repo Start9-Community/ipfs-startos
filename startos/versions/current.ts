@@ -1,17 +1,17 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '0.42.0:6',
+  version: '0.42.0:7',
   releaseNotes: {
-    en_US:
-      'Stops trusting certificates from a compromised certificate authority (eMudhra).',
+    en_US: 'Updated to start-sdk 3.1.1 with container startup fixes.',
     es_ES:
-      'Deja de confiar en los certificados de una autoridad de certificación comprometida (eMudhra).',
+      'Actualizado a start-sdk 3.1.1 con correcciones de inicio de contenedores.',
     de_DE:
-      'Vertraut Zertifikaten einer kompromittierten Zertifizierungsstelle (eMudhra) nicht mehr.',
+      'Aktualisierung auf start-sdk 3.1.1 mit Fehlerbehebungen beim Containerstart.',
     pl_PL:
-      'Przestaje ufać certyfikatom przejętego urzędu certyfikacji (eMudhra).',
-    fr_FR: `Ne fait plus confiance aux certificats d'une autorité de certification compromise (eMudhra).`,
+      'Zaktualizowano do start-sdk 3.1.1 z poprawkami uruchamiania kontenerów.',
+    fr_FR:
+      'Mise à jour vers start-sdk 3.1.1 avec des correctifs de démarrage des conteneurs.',
   },
   migrations: {
     up: async ({ effects }) => {},
