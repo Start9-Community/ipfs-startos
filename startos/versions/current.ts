@@ -1,17 +1,18 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '0.42.0:6',
+  version: '0.42.0:7',
   releaseNotes: {
     en_US:
-      'Stops trusting certificates from a compromised certificate authority (eMudhra).',
+      'The instructions cover keeping your home IP private when you publish IPFS through StartTunnel.',
     es_ES:
-      'Deja de confiar en los certificados de una autoridad de certificación comprometida (eMudhra).',
+      'Las instrucciones explican cómo mantener privada tu IP doméstica cuando publicas IPFS a través de StartTunnel.',
     de_DE:
-      'Vertraut Zertifikaten einer kompromittierten Zertifizierungsstelle (eMudhra) nicht mehr.',
+      'Die Anleitung erklärt, wie Ihre Heim-IP-Adresse privat bleibt, wenn Sie IPFS über StartTunnel veröffentlichen.',
     pl_PL:
-      'Przestaje ufać certyfikatom przejętego urzędu certyfikacji (eMudhra).',
-    fr_FR: `Ne fait plus confiance aux certificats d'une autorité de certification compromise (eMudhra).`,
+      'Instrukcje wyjaśniają, jak zachować prywatność domowego adresu IP, gdy publikujesz IPFS przez StartTunnel.',
+    fr_FR:
+      'Les instructions expliquent comment garder votre IP personnelle privée lorsque vous publiez IPFS via StartTunnel.',
   },
   migrations: {
     up: async ({ effects }) => {},
