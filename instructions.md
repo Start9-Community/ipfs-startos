@@ -32,3 +32,5 @@ Share IPFS content by giving people a URL on your gateway: `https://<gateway-hos
 ### Swarm P2P
 
 The Swarm interface is the address other IPFS nodes use to connect to yours. You normally won't open it in a browser — it's listed so you can see the node's peer addresses and confirm reachability.
+
+If you publish the **Swarm** interface through StartTunnel to keep your home IP private, send IPFS's outbound traffic through that tunnel too. Connections IPFS opens itself to other IPFS nodes otherwise leave through your home router, so those peers see your home IP. If you use the tunnel for another reason, such as a port your router can't forward, there is nothing to change.
