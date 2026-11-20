@@ -64,17 +64,20 @@ Two volumes, one of which the container never sees.
 
 ## File Models
 
-One model, and it is nearly empty — because **Kubo's own configuration is not modelled at all**.
+One model, holding only the admin password — because **Kubo's own configuration is not modelled at all**.
 
-| File         | Format | Modelled                | Written by |
-| ------------ | ------ | ----------------------- | ---------- |
-| `store.json` | JSON   | Yes — `FileHelper.json` | Init       |
+| File         | Format | Modelled                | Written by                         |
+| ------------ | ------ | ----------------------- | ---------------------------------- |
+| `store.json` | JSON   | Yes — `FileHelper.json` | Init and the admin-password action |
+
+`store.json` holds `password` (the RPC API password) and `passwordSet` (whether the owner has created one through the action). Until they have, init stores a generated password nobody has seen, so the API is never open.
 
 Kubo's configuration is instead rewritten on every start by a oneshot that shells out to the application's own configuration command. That is a deliberate choice rather than an oversight: the values being written are **derived from the addresses this server currently has**, so they cannot be a static file.
 
 What it sets each start:
 
 - **The API's allowed origins**, from the admin interface's own current addresses. Without this the web UI cannot call the API it is served from.
+- **`API.Authorizations`**, a single entry `admin` with `AuthSecret` `basic:admin:<password>` from `store.json` and `AllowedPaths` `["/api/v0"]`. Kubo then refuses every `/api/v0` request (403) that lacks that HTTP Basic credential, except `/api/v0/version`.
 - **The API and gateway bind addresses**, pinned so StartOS can reach them.
 - **The public gateway table**, built from the gateway interface's current addresses, with subdomain resolution enabled for content paths.
 - **Relay client and relay transport**, both on, so the node can be reached from behind a NAT.
@@ -95,7 +98,7 @@ Three interfaces, and they differ in how exposed they should be.
 | Public Gateway         | `gateway` | ui   | 8080 | `/ipfs`  | Serves content to anyone           |
 | Swarm P2P              | `swarm`   | p2p  | 4001 | —        | The IPFS peer-to-peer network      |
 
-**The admin portal has no authentication.** Its name says "private", and it is named that because it is _meant_ to stay private — not because anything enforces it. The API on that port can add and remove pins, change configuration, and read the node's identity, and anyone who can reach the address can do all of it. **StartOS's per-address controls are the only access boundary**, so do not give this interface a public address.
+**The admin portal's RPC API requires the admin password.** The API on port 5001 can add and remove pins, change configuration, and read the node's identity, so Kubo's `API.Authorizations` gates every `/api/v0` path behind HTTP Basic auth as user `admin`. Kubo answers a missing or wrong credential with a bare 403 and no `WWW-Authenticate` challenge, so a browser never prompts: the Web UI (served from the same port at `/webui`, which redirects to the bundled `/ipfs/<cid>`, and is not gated) loads, fails to reach the API, and shows its "Could not connect to the Kubo RPC" screen with a **Kubo RPC API address** field. Entering `https://admin:<password>@<host>` there (or under Settings) makes it send the credential; it keeps that address in the browser's local storage. Any other RPC client needs the same credential, e.g. `ipfs --api-auth basic:admin:<password> …`, including the `ipfs` CLI run by `start-cli package attach ipfs -n ipfs-sub` while the daemon is up.
 
 The gateway is the opposite: it exists to be reachable, and serves content to whoever asks.
 
@@ -105,7 +108,7 @@ The interfaces live on hosts `rpc-multi`, `gateway-multi` and `swarm-multi`. An 
 
 ## Installation and First-Run Flow
 
-Install initializes the node once, generating its identity, and seeds the store. Nothing else is required — there is no task and no credential.
+Install initializes the node once, generating its identity, and seeds the store. Init then stores a generated RPC password nobody has seen and raises an important task to run **Create Admin Password**; the service starts and the gateway and swarm work meanwhile, but nothing can use the RPC API (so the Web UI cannot connect) until the owner runs it.
 
 On every start, the configuration oneshot re-derives the origin and gateway settings from the addresses the server currently has, then the daemon comes up. That is why an address change is picked up by restarting rather than by editing anything.
 
@@ -113,13 +116,15 @@ On every start, the configuration oneshot re-derives the origin and gateway sett
 
 ## Actions
 
-None. The package ships an empty action set — everything is done from the admin portal.
+| Action                                       | Id               | What it does                                                                                                                                                                                                            |
+| -------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Create Admin Password / Reset Admin Password | `reset-password` | Generates a 32-character alphanumeric password, stores it in `store.json` (setting `passwordSet`), and returns username `admin` and the masked password. The daemon restarts so `API.Authorizations` takes the new one. |
 
-An admin-password action exists in the source but is commented out and not registered, so there is no way to add authentication to the admin portal from StartOS today.
+Everything else is done from the admin portal.
 
 ## Tasks
 
-None. This package raises no tasks, so the service is never held on a prompt and its ordinary controls are always available.
+One, **important**: run **Create Admin Password**, raised by init whenever `passwordSet` is not true (fresh install, an update from a version without the password, or a restore). It does not block the service from starting.
 
 ## Health Checks
 
@@ -142,11 +147,13 @@ Two consequences:
 
 Content that was merely cached rather than pinned is not worth preserving and comes back on demand; the pinset is the part that matters.
 
+`store.json` is on the `startos` volume, which is not backed up, so a restored node gets a fresh unseen password and the **Create Admin Password** task again.
+
 ## Limitations and Differences
 
-1. **The admin portal is unauthenticated.** Treat reachability as the only control, and keep it off public addresses.
-2. **No actions at all.** There is nothing to configure from StartOS; the admin portal is the whole surface.
-3. **Several Kubo settings are re-derived on every start** — API origins, bind addresses, the public gateway table, and the relay settings — so hand edits to those do not survive.
+1. **The Web UI does not prompt for the password.** It has to be given the API address with the credential (`https://admin:<password>@<host>`) once per browser.
+2. **One action only**, for the admin password; everything else is configured from the admin portal.
+3. **Several Kubo settings are re-derived on every start** — API origins, the API authorization, bind addresses, the public gateway table, and the relay settings — so hand edits to those do not survive.
 4. **The backup includes the entire pinset**, so its size tracks your storage.
 5. **An address change needs a restart** before the gateway advertises it.
 6. **Content is never fetched automatically.** A fresh node is empty.
@@ -167,15 +174,17 @@ volumes:
   main: /data/ipfs # identity, config, and pinned blocks
   startos: not mounted # package state
 file_models:
-  - store.json # Kubo's own config is rewritten via its CLI, not modelled
+  - store.json # admin password; Kubo's own config is rewritten via its CLI, not modelled
 startos_managed_env_vars: []
 dependencies: []
 interfaces:
-  rpc: { type: ui, port: 5001, path: /webui } # unauthenticated
+  rpc: { type: ui, port: 5001, path: /webui } # /api/v0 requires basic auth admin:<password>
   gateway: { type: ui, port: 8080, path: /ipfs }
   swarm: { type: p2p, port: 4001 }
-actions: []
-tasks: []
+actions:
+  - reset-password # Create / Reset Admin Password
+tasks:
+  - reset-password # important, until the owner creates the password
 health_checks:
   - primary # displayed "Web Interface"; probes the admin API only
 ```

@@ -14,6 +14,8 @@ export const rpcInterfaceId = 'rpc'
 export const gatewayInterfaceId = 'gateway'
 export const swarmInterfaceId = 'swarm'
 
+export const rpcUsername = 'admin'
+
 export const mounts = sdk.Mounts.of().mountVolume({
   volumeId: 'main',
   subpath: null,

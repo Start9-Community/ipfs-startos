@@ -34,7 +34,6 @@ verified, tried, and decided belongs in the commit message and the PR body.
 
 ## This repo
 
-- **The admin-portal auth path is commented out in four places** — `actions/resetPassword.ts`, its registration in `actions/index.ts`, `init/taskSetPassword.ts`, and the `API.Authorizations` block plus the `username` field in `interfaces.ts`/`main.ts`. Re-enable all of them together; leaving it half-done is worse than either state.
 - **`runAsInit: true` is required** — the upstream image expects to be PID 1.
 - **`ipfs init` runs once, gated on `kind === 'install'`.** It generates the node's peer identity; running it again would replace that identity and orphan every address others use to reach the node.
 - **The `chown` oneshot must stay ordered after `config`.** The config step writes as root; without the chown afterwards the daemon cannot read its own data directory.

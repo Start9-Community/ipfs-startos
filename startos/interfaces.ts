@@ -1,4 +1,3 @@
-// import { storeJson } from './fileModels/store.json'
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import {
@@ -16,8 +15,6 @@ import {
 export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   // rpc
 
-  // const password = await storeJson.read((s) => s.password).const(effects)
-
   const rpcMulti = sdk.MultiHost.of(effects, rpcHostId)
   const rpcMultiOrigin = await rpcMulti.bindPort(rpcPort, {
     protocol: 'http',
@@ -29,7 +26,6 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     type: 'ui',
     masked: false,
     schemeOverride: null,
-    // username: `admin:${password}`,
     username: null,
     path: '/webui',
     query: {},
