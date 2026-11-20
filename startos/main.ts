@@ -1,4 +1,4 @@
-// import { storeJson } from './fileModels/store.json'
+import { storeJson } from './fileModels/store.json'
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import {
@@ -9,6 +9,7 @@ import {
   rpcHostId,
   rpcInterfaceId,
   rpcPort,
+  rpcUsername,
 } from './utils'
 
 export const main = sdk.setupMain(async ({ effects }) => {
@@ -19,10 +20,8 @@ export const main = sdk.setupMain(async ({ effects }) => {
    */
   console.info(i18n('Starting IPFS!'))
 
-  // const password = await storeJson.read((s) => s.password).const(effects)
-  // if (!password) {
-  //   throw new Error('password not found')
-  // }
+  const password = await storeJson.read((s) => s.password).const(effects)
+  if (!password) throw new Error('No RPC API password in store.json')
 
   const subcontainer = sdk.SubContainer.of(
     effects,
@@ -102,23 +101,17 @@ export const main = sdk.setupMain(async ({ effects }) => {
             'Addresses.Gateway',
             `"/ip4/0.0.0.0/tcp/${gatewayPort}"`,
           ])
-          // await sub.exec([
-          //   ...prefix,
-          //   '--json',
-          //   'API.Authorizations',
-          //   JSON.stringify({
-          //     Admin: {
-          //       AuthSecret: `basic:admin:${password}`,
-          //       AllowedPaths: ['/api/v0'],
-          //     },
-          //   }),
-          // ])
-          // await sub.exec([
-          //   ...prefix,
-          //   '--json',
-          //   'API.HTTPHeaders.Access-Control-Allow-Credentials',
-          //   '["true"]',
-          // ])
+          await sub.execFail([
+            ...prefix,
+            '--json',
+            'API.Authorizations',
+            JSON.stringify({
+              [rpcUsername]: {
+                AuthSecret: `basic:${rpcUsername}:${password}`,
+                AllowedPaths: ['/api/v0'],
+              },
+            }),
+          ])
           await sub.exec([
             ...prefix,
             '--json',
